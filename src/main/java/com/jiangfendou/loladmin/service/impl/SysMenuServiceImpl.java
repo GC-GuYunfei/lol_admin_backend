@@ -1,5 +1,6 @@
 package com.jiangfendou.loladmin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
@@ -7,15 +8,20 @@ import com.jiangfendou.loladmin.entity.SysMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.jiangfendou.loladmin.enums.ErrorCode;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
+import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
+import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import com.jiangfendou.loladmin.service.SysUserService;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -73,6 +79,31 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return menuAuthorityResponse;
     }
 
+    @Override
+    public List<SearchMenusResponse> searchMenus() throws BusinessException {
+        List<SysMenu> sysMenus = this.list(new QueryWrapper<SysMenu>().orderByAsc("order_num"));
+        if (sysMenus.isEmpty()) {
+            log.info("menu list is empty");
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+        }
+        List<SysMenu> sysMenusTree = buildTreeMenu(sysMenus);
+        return convertMenuList(sysMenusTree);
+    }
+
+    @Override
+    public GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException {
+        GetMenuDetailResponse getMenuDetailResponse = new GetMenuDetailResponse();
+        SysMenu sysMenu = this.getById(userId);
+        if (Objects.isNull(sysMenu)) {
+            log.info("getMenuDetail ---目标数据没有被找到， userId = {}", userId);
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+        }
+        BeanUtils.copyProperties(sysMenu, getMenuDetailResponse);
+        return getMenuDetailResponse;
+    }
+
     private List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuTrees) {
         List<SysMenu> finalMenus = new ArrayList<>();
         sysMenuTrees.forEach(menu -> {
@@ -105,6 +136,19 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             menuList.add(menuResource);
         });
 
+        return menuList;
+    }
+
+    private List<SearchMenusResponse> convertMenuList(List<SysMenu> sysMenuTrees) {
+        List<SearchMenusResponse> menuList = new ArrayList<>();
+        sysMenuTrees.forEach(sysMenu -> {
+            SearchMenusResponse menuResource = new SearchMenusResponse();
+            BeanUtils.copyProperties(sysMenu, menuResource);
+            if (sysMenu.getChildren().size() > 0) {
+                menuResource.setChildren(convertMenuList(sysMenu.getChildren()));
+            }
+            menuList.add(menuResource);
+        });
         return menuList;
     }
 }

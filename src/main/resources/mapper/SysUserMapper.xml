@@ -7,8 +7,11 @@
             DISTINCT t2.menu_id
         FROM
             sys_user_role t1
-                LEFT JOIN sys_role_menu t2 ON t1.role_id = t2.role_id
-        WHERE t1.user_id = #{userId}
+                LEFT JOIN sys_role_menu t2 ON t1.role_id = t2.role_id AND t2.is_deleted = 0
+        WHERE
+              t1.is_deleted = 0
+        AND
+              t1.user_id = #{userId}
 
     </select>
 </mapper>

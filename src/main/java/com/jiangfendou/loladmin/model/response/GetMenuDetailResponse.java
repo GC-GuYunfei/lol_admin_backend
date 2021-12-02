@@ -1,29 +1,14 @@
-package com.jiangfendou.loladmin.entity;
+package com.jiangfendou.loladmin.model.response;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import java.util.ArrayList;
-import java.util.List;
+import com.jiangfendou.loladmin.entity.SysMenu;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author jobob
- * @since 2021-11-07
- */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SysMenu extends BaseEntity {
+public class GetMenuDetailResponse {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 父菜单ID，以及菜单为0
-     */
-    private Long parentId;
+    private Long id;
 
     private String name;
 
@@ -57,8 +42,5 @@ public class SysMenu extends BaseEntity {
     private Integer lockVersion;
 
     private Integer status;
-
-    @TableField(exist = false)
-    private List<SysMenu> children = new ArrayList<>();
 
 }
