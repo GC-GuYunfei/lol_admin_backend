@@ -14,7 +14,9 @@ public enum ErrorCode {
     EXPIRED_TOKEN("e.jfd.1005", "token已过期"),
     NOT_LOGIN_ERROR("e.jfd.1006", "对不起您尚未登录"),
     NO_ACCESS_ALLOWED_ERROR("e.jfd.1007", "不允许访问"),
-    NOT_FOUND("e.jfd.1008", "找不到目标数据");
+    NOT_FOUND("e.jfd.1008", "找不到目标数据"),
+    MENU_PERM_CODE_EXIST("e.jfd.1009", "权限编码--{%s}--已存在"),
+    BAD_REQUEST_ERROR("e.jfd.1010", "请求参数异常");
 
     /** error code. */
     private final String code;

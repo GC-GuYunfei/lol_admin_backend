@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.service;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
@@ -34,8 +35,15 @@ public interface SysMenuService extends IService<SysMenu> {
 
     /**
      * getMenuDetail()
+     * @Param userId userId
      * @return List<GetMenuDetailResponse> List<GetMenuDetailResponse>
      * */
     GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException;
+
+    /**
+     * updateMenu()
+     * @Param userId userId
+     * */
+    void updateMenu(UpdateMenuRequest updateMenuRequest) throws BusinessException;
 
 }

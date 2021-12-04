@@ -6,8 +6,10 @@ import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
+import com.jiangfendou.loladmin.enums.DeletedFlag;
 import com.jiangfendou.loladmin.enums.ErrorCode;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
+import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +50,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public MenuAuthorityResponse getMenuNav(Long userId) throws BusinessException {
         MenuAuthorityResponse menuAuthorityResponse = new MenuAuthorityResponse();
-        SysUser sysUser = sysUserService.getById(userId);
+        SysUser sysUser = sysUserService.getOne(new QueryWrapper<SysUser>().eq("id", userId)
+            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
         if (sysUser == null) {
             log.info("没有找到的指定用户：userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
@@ -65,7 +69,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
         List<Long> navMenuIds = sysMenuMapper.getNavMenuIds(userId);
         List<SysMenu> sysMenus = this.listByIds(navMenuIds);
-
         if (navMenuIds.isEmpty() || sysMenus.isEmpty()) {
             log.info("没有找到的指定用户菜单：userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
@@ -81,7 +84,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
     @Override
     public List<SearchMenusResponse> searchMenus() throws BusinessException {
-        List<SysMenu> sysMenus = this.list(new QueryWrapper<SysMenu>().orderByAsc("order_num"));
+        List<SysMenu> sysMenus = this.list(new QueryWrapper<SysMenu>().orderByAsc("order_num")
+            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
         if (sysMenus.isEmpty()) {
             log.info("menu list is empty");
             throw new BusinessException(HttpStatus.NOT_FOUND,
@@ -94,14 +98,40 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException {
         GetMenuDetailResponse getMenuDetailResponse = new GetMenuDetailResponse();
-        SysMenu sysMenu = this.getById(userId);
+        SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
+            .eq("id", userId)
+            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
         if (Objects.isNull(sysMenu)) {
-            log.info("getMenuDetail ---目标数据没有被找到， userId = {}", userId);
+            log.info("getMenuDetail() ---目标数据没有被找到， userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
                 new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
         }
         BeanUtils.copyProperties(sysMenu, getMenuDetailResponse);
         return getMenuDetailResponse;
+    }
+
+    @Override
+    public void updateMenu(UpdateMenuRequest updateMenuRequest) throws BusinessException {
+        SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
+            .eq("id", updateMenuRequest.getId())
+            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+        if (Objects.isNull(sysMenu)) {
+            log.info("updateMenu() ---目标数据没有被找到， userId = {}", updateMenuRequest.getId());
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+        }
+        SysMenu perms = this.getOne(new QueryWrapper<SysMenu>()
+            .eq("perms", updateMenuRequest.getPerms())
+            .eq("is_deleted", DeletedFlag.NOT_DELETED));
+        if (perms != null) {
+            log.info("updateMenu() ---权限编码已存在， Perms = {}", updateMenuRequest.getPerms());
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                new ApiError(ErrorCode.MENU_PERM_CODE_EXIST.getCode(),
+                    String.format(ErrorCode.MENU_PERM_CODE_EXIST.getMessage(), updateMenuRequest.getPerms())));
+        }
+        // 修改menu数据
+        sysMenuMapper.updateMenu(updateMenuRequest);
+
     }
 
     private List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuTrees) {

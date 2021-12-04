@@ -5,6 +5,7 @@ import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
+import com.jiangfendou.loladmin.enums.DeletedFlag;
 import com.jiangfendou.loladmin.enums.ErrorCode;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
 import com.jiangfendou.loladmin.mapper.SysRoleMapper;
@@ -62,7 +63,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public String getUserAuthorityInfo(Long userId) {
         // ROLE_admin,sys:user:list .....
         String authority = "";
-        SysUser sysUser = sysUserMapper.selectById(userId);
+        SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
+            .eq("is_deleted", DeletedFlag.NOT_DELETED));
         if (redisUtil.hasKey(GRANTED_AUTHORITY + sysUser.getUsername())) {
             log.info("redis获取用户信息 -------{}", GRANTED_AUTHORITY + sysUser.getUsername());
             authority = (String)redisUtil.get(GRANTED_AUTHORITY + sysUser.getUsername());
@@ -111,7 +113,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public SysUserResponse getUserInfo(Long userId) throws BusinessException {
-        SysUser sysUser = this.getById(userId);
+//        SysUser sysUser = this.getById(userId);
+        SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
+            .eq("is_deleted", DeletedFlag.NOT_DELETED));
         if (Objects.isNull(sysUser)) {
             log.info("没有找到的指定用户信息：userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,

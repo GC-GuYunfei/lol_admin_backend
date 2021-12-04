@@ -26,4 +26,41 @@
         AND
             t1.user_id = #{userId}
     </select>
+
+    <update id="updateMenu" parameterType="com.jiangfendou.loladmin.model.request.UpdateMenuRequest">
+        UPDATE sys_menu
+        <trim prefix="set" suffixOverrides=",">
+            <if test="updateMenuRequest.parentId != null">
+                parent_id = #{updateMenuRequest.parentId},
+            </if>
+            <if test="updateMenuRequest.name !=null || updateMenuRequest.name != ''">
+                `name` = #{updateMenuRequest.name},
+            </if>
+            <if test="updateMenuRequest.path !=null || updateMenuRequest.path != ''">
+                `path` = #{updateMenuRequest.path},
+            </if>
+            <if test="updateMenuRequest.perms !=null || updateMenuRequest.perms != ''">
+                perms = #{updateMenuRequest.perms},
+            </if>
+            <if test="updateMenuRequest.component !=null || updateMenuRequest.component != ''">
+                component = #{updateMenuRequest.component},
+            </if>
+            <if test="updateMenuRequest.type !=null">
+                `type` = #{updateMenuRequest.type},
+            </if>
+            <if test="updateMenuRequest.icon !=null || updateMenuRequest.icon != ''">
+                icon = #{updateMenuRequest.icon},
+            </if>
+            <if test="updateMenuRequest.orderNum !=null">
+                order_num = #{updateMenuRequest.orderNum},
+            </if>
+            <if test="updateMenuRequest.status !=null">
+                status = #{updateMenuRequest.status},
+            </if>
+            lock_version = lock_version + 1
+        </trim>
+        <where>
+            id = #{updateMenuRequest.id}
+        </where>
+    </update>
 </mapper>

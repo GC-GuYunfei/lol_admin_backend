@@ -1,10 +1,18 @@
 package com.jiangfendou.loladmin.common;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.jiangfendou.loladmin.enums.ErrorCode;
+import java.util.HashMap;
+import java.util.Map;
+import javax.validation.UnexpectedTypeException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +20,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private ObjectError objectError;
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = RuntimeException.class)
@@ -47,5 +57,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ApiResponse.failed(HttpStatus.UNAUTHORIZED,
             new ApiError(ErrorCode.NO_ACCESS_ALLOWED_ERROR.getCode(),
                 ErrorCode.NO_ACCESS_ALLOWED_ERROR.getMessage())), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = BindException.class)
+    public ResponseEntity<ApiResponse> handler(BindException bindException) {
+        Map<String, String> errorMap = this.getErrorMap(bindException);
+        log.error("参数异常：-----------{}", errorMap);
+        return new ResponseEntity<>(ApiResponse.failed(HttpStatus.BAD_REQUEST,
+            new ApiError(ErrorCode.BAD_REQUEST_ERROR.getCode(),
+                errorMap.toString())), HttpStatus.BAD_REQUEST);
+    }
+
+    private Map<String, String> getErrorMap(BindException bindException) {
+        Map<String, String> mapError = new HashMap<>();
+        bindException.getAllErrors().forEach(objectError -> {
+            String defaultMessage = objectError.getDefaultMessage();
+            if(StringUtils.isBlank(defaultMessage)) {
+                mapError.put(objectError.getObjectName(), "参数异常");
+            } else {
+                String[] split = defaultMessage.split(":");
+                mapError.put(split[0], split[1]);
+            }
+        });
+        return mapError;
     }
 }

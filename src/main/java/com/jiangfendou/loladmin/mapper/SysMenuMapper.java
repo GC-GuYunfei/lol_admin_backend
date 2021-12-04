@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.mapper;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jiangfendou.loladmin.entity.SysUser;
+import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -32,5 +33,11 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * @return List<Long> List<Long>
      * */
     List<Long> getNavMenuIds(@Param("userId") Long userId);
+
+    /**
+     * updateMenu()
+     * @Param updateMenuRequest updateMenuRequest
+     * */
+    void updateMenu(@Param("updateMenuRequest") UpdateMenuRequest updateMenuRequest);
 
 }
