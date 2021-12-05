@@ -38,6 +38,13 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * updateMenu()
      * @Param updateMenuRequest updateMenuRequest
      * */
-    void updateMenu(@Param("updateMenuRequest") UpdateMenuRequest updateMenuRequest);
+    int updateMenu(@Param("updateMenuRequest") UpdateMenuRequest updateMenuRequest);
+
+    /**
+     * updateMenu()
+     * @Param navMenuIds navMenuIds
+     * @Return List<SysMenu> List<SysMenu>
+     * */
+    List<SysMenu> searchMenus(@Param("navMenuIds") List<Long> navMenuIds);
 
 }

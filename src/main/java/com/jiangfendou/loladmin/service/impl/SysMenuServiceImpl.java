@@ -1,5 +1,6 @@
 package com.jiangfendou.loladmin.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jiangfendou.loladmin.common.ApiError;
@@ -15,12 +16,10 @@ import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import com.jiangfendou.loladmin.service.SysUserService;
-import java.nio.charset.StandardCharsets;
+import com.jiangfendou.loladmin.util.RedisUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,43 +40,59 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements SysMenuService {
 
+    private static final String USER_MENU = "UserMenu:";
+
     @Autowired
     private SysUserService sysUserService;
 
     @Autowired
     private SysMenuMapper sysMenuMapper;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     @Override
     public MenuAuthorityResponse getMenuNav(Long userId) throws BusinessException {
         MenuAuthorityResponse menuAuthorityResponse = new MenuAuthorityResponse();
-        SysUser sysUser = sysUserService.getOne(new QueryWrapper<SysUser>().eq("id", userId)
-            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
-        if (sysUser == null) {
-            log.info("没有找到的指定用户：userId = {}", userId);
-            throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
-        }
-        // 获取用户权限信息
-        String userAuthorityInfo = sysUserService.getUserAuthorityInfo(sysUser.getId());
-        if (StringUtils.isBlank(userAuthorityInfo)) {
-            menuAuthorityResponse.setAuthorities(new ArrayList<>());
+        List<MenuAuthorityResponse.Menu> menus;
+        if (redisUtil.hasKey(USER_MENU + userId)) {
+            menus = (List<MenuAuthorityResponse.Menu>)redisUtil.get(USER_MENU + userId);
+            log.info("redis获取menu信息 -------{}, menus = {}", USER_MENU + userId, menus);
         } else {
-            String[] userAuthorityArray = userAuthorityInfo.split(",");
-            List<String> userAuthorityList = Arrays.asList(userAuthorityArray);
-            menuAuthorityResponse.setAuthorities(userAuthorityList);
-        }
+            SysUser sysUser = sysUserService.getOne(new QueryWrapper<SysUser>().eq("id", userId)
+                .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+            if (sysUser == null) {
+                log.info("没有找到的指定用户：userId = {}", userId);
+                throw new BusinessException(HttpStatus.NOT_FOUND,
+                    new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+            }
+            // 获取用户权限信息
+            String userAuthorityInfo = sysUserService.getUserAuthorityInfo(sysUser.getId());
+            if (StringUtils.isBlank(userAuthorityInfo)) {
+                menuAuthorityResponse.setAuthorities(new ArrayList<>());
+            } else {
+                String[] userAuthorityArray = userAuthorityInfo.split(",");
+                List<String> userAuthorityList = Arrays.asList(userAuthorityArray);
+                menuAuthorityResponse.setAuthorities(userAuthorityList);
+            }
 
-        List<Long> navMenuIds = sysMenuMapper.getNavMenuIds(userId);
-        List<SysMenu> sysMenus = this.listByIds(navMenuIds);
-        if (navMenuIds.isEmpty() || sysMenus.isEmpty()) {
-            log.info("没有找到的指定用户菜单：userId = {}", userId);
-            throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+            List<Long> navMenuIds = sysMenuMapper.getNavMenuIds(userId);
+
+            // 获取menus对象集合
+            List<SysMenu> sysMenus = sysMenuMapper.searchMenus(navMenuIds);
+            if (navMenuIds.isEmpty() || sysMenus.isEmpty()) {
+                log.info("没有找到的指定用户菜单：userId = {}", userId);
+                throw new BusinessException(HttpStatus.NOT_FOUND,
+                    new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+            }
+            // 转树状结构
+            List<SysMenu> sysMenuTrees = buildTreeMenu(sysMenus);
+            // 实体转DTO
+            menus = convert(sysMenuTrees);
+            if (menus.size() > 0) {
+                redisUtil.set(USER_MENU + userId, menus, 60*60);
+            }
         }
-        // 转树状结构
-        List<SysMenu> sysMenuTrees = buildTreeMenu(sysMenus);
-        // 实体转DTO
-        List<MenuAuthorityResponse.Menu> menus = convert(sysMenuTrees);
         menuAuthorityResponse.setNav(menus);
         return menuAuthorityResponse;
     }
@@ -122,7 +137,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         }
         SysMenu perms = this.getOne(new QueryWrapper<SysMenu>()
             .eq("perms", updateMenuRequest.getPerms())
-            .eq("is_deleted", DeletedFlag.NOT_DELETED));
+            .eq("is_deleted", DeletedFlag.NOT_DELETED).le("id", updateMenuRequest.getId()));
         if (perms != null) {
             log.info("updateMenu() ---权限编码已存在， Perms = {}", updateMenuRequest.getPerms());
             throw new BusinessException(HttpStatus.BAD_REQUEST,
@@ -130,8 +145,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     String.format(ErrorCode.MENU_PERM_CODE_EXIST.getMessage(), updateMenuRequest.getPerms())));
         }
         // 修改menu数据
-        sysMenuMapper.updateMenu(updateMenuRequest);
-
+        int updateCount = sysMenuMapper.updateMenu(updateMenuRequest);
+        if (updateCount > 0) {
+            sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+        }
     }
 
     private List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuTrees) {

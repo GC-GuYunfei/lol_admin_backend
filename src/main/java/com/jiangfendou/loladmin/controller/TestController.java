@@ -4,6 +4,10 @@ import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.jiangfendou.loladmin.service.SysUserService;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,8 +46,22 @@ public class TestController {
 //    @Autowired
 //    private SysUserService sysUserService;
 
+
     @GetMapping("/userInfo")
     public ApiResponse getUserInfo(Long userId) throws BusinessException {
         return ApiResponse.success(sysUserService.getUserInfo(userId));
+    }
+
+    public static void main(String[] args) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date returnDate = dateFormat.parse("2021-12-07 13:00");
+        Date pickUpDate = dateFormat.parse("2021-12-04 00:00");
+        long minutes = (returnDate.getTime() - pickUpDate.getTime()) / 1000 / 60;
+        long hour =  (minutes - 240) / 60;
+        hour = minutes % 60 == 0 ? hour : (hour + 1);
+        Long day = hour / 24;
+        day = hour % 24 == 0 ? day : (day + 1);
+        Integer rental = day.intValue();
+        System.out.println("rental:" + rental);
     }
 }

@@ -26,6 +26,27 @@
         AND
             t1.user_id = #{userId}
     </select>
+    <select id="searchMenus" resultType="com.jiangfendou.loladmin.entity.SysMenu">
+        SELECT
+            id,
+            parent_id AS parentId,
+            `name`,
+            `path`,
+            perms,
+            component,
+            `type`,
+            icon,
+            status,
+            order_num AS orderNum
+        FROM sys_menu
+        WHERE
+            is_deleted = 0
+        AND
+            id IN
+        <foreach collection="navMenuIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 
     <update id="updateMenu" parameterType="com.jiangfendou.loladmin.model.request.UpdateMenuRequest">
         UPDATE sys_menu

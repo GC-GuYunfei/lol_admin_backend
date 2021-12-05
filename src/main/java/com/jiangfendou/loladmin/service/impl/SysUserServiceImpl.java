@@ -38,6 +38,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private static final String GRANTED_AUTHORITY = "GrantedAuthority:";
 
+    private static final String USER_MENU = "UserMenu:";
+
     private static final String ROLE = "ROLE_";
 
     @Autowired
@@ -66,15 +68,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
             .eq("is_deleted", DeletedFlag.NOT_DELETED));
         if (redisUtil.hasKey(GRANTED_AUTHORITY + sysUser.getUsername())) {
-            log.info("redis获取用户信息 -------{}", GRANTED_AUTHORITY + sysUser.getUsername());
             authority = (String)redisUtil.get(GRANTED_AUTHORITY + sysUser.getUsername());
+            log.info("redis获取用户信息 -------{}, Authority = {}", GRANTED_AUTHORITY + sysUser.getUsername(), authority);
         } else {
             // 获取角色
             List<RoleResponse> roles = sysRoleMapper.searchRoleList(userId);
             if (!roles.isEmpty()) {
                  authority = roles.stream().map(role -> ROLE + role.getCode())
                     .collect(Collectors.joining(","));
-//                authority = roleCodes.concat(",");
             }
             // 获取菜单权限
             List<Long> menuIds = sysUserMapper.getNavMenusIds(userId);
@@ -91,8 +92,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public void clearUserAuthorityInfo(String username) {
+    public void clearUserAuthorityInfo(String username, Long userId) {
         redisUtil.del(GRANTED_AUTHORITY + username);
+        redisUtil.del(USER_MENU + userId);
     }
 
     @Override
@@ -113,7 +115,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public SysUserResponse getUserInfo(Long userId) throws BusinessException {
-//        SysUser sysUser = this.getById(userId);
         SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
             .eq("is_deleted", DeletedFlag.NOT_DELETED));
         if (Objects.isNull(sysUser)) {

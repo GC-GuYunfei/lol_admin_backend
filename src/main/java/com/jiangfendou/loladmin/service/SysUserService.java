@@ -4,6 +4,7 @@ import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jiangfendou.loladmin.model.response.SysUserResponse;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -32,8 +33,9 @@ public interface SysUserService extends IService<SysUser> {
     /**
      * clearUserAuthorityInfo()
      * @Param userId userId
+     * @Param username username
      * */
-    void clearUserAuthorityInfo(String username);
+    void clearUserAuthorityInfo(String username, Long userId);
 
     /**
      * clearUserAuthorityInfoByRoleId()
