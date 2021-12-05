@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.controller;
 
 import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
+import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
@@ -10,8 +11,10 @@ import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import java.util.List;
 import javax.validation.Valid;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  *  前端控制器
  * </p>
  *
- * @author jobob
+ * @author jiangfendou
  * @since 2021-11-07
  */
 @RestController
@@ -52,6 +55,12 @@ public class SysMenuController extends BaseController {
     @PutMapping("/update")
     public ApiResponse updateMenu(@RequestBody @Validated UpdateMenuRequest updateMenuRequest) throws BusinessException {
         sysMenuService.updateMenu(updateMenuRequest);
+        return ApiResponse.success();
+    }
+
+    @DeleteMapping("/delete")
+    public ApiResponse deleteMenu(@RequestBody @Validated DeleteMenuRequest deleteMenuRequest) throws BusinessException {
+        sysMenuService.deleteMenu(deleteMenuRequest);
         return ApiResponse.success();
     }
 }

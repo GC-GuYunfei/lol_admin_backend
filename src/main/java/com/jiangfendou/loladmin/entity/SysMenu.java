@@ -1,6 +1,7 @@
 package com.jiangfendou.loladmin.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -57,6 +58,8 @@ public class SysMenu extends BaseEntity {
     private Integer lockVersion;
 
     private Integer status;
+
+    private LocalDateTime deleteDatetime;
 
     @TableField(exist = false)
     private List<SysMenu> children = new ArrayList<>();

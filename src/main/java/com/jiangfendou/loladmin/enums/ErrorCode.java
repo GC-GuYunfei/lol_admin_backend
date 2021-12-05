@@ -16,7 +16,8 @@ public enum ErrorCode {
     NO_ACCESS_ALLOWED_ERROR("e.jfd.1007", "不允许访问"),
     NOT_FOUND("e.jfd.1008", "找不到目标数据"),
     MENU_PERM_CODE_EXIST("e.jfd.1009", "权限编码--{%s}--已存在"),
-    BAD_REQUEST_ERROR("e.jfd.1010", "请求参数异常");
+    BAD_REQUEST_ERROR("e.jfd.1010", "请求参数异常"),
+    LOCKED("e.jfd.1011", "目标数据已经被锁定");
 
     /** error code. */
     private final String code;

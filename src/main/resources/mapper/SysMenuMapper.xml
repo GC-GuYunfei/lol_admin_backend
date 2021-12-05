@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiangfendou.loladmin.mapper.SysMenuMapper">
+    <delete id="deleteMenu">
+        UPDATE sys_menu
+        <trim prefix="set" suffixOverrides=",">
+
+            <if test="updateMenuRequest.deleteDatetime !=null">
+                delete_datetime = #{updateMenuRequest.deleteDatetime},
+            </if>
+            lock_version = lock_version + 1
+        </trim>
+        <where>
+            id = #{updateMenuRequest.id}
+        AND
+            lock_version = #{updateMenuRequest.lockVersion}
+        </where>
+    </delete>
 
     <select id="searchUserList" resultType="com.jiangfendou.loladmin.entity.SysUser">
         SELECT
@@ -82,6 +97,8 @@
         </trim>
         <where>
             id = #{updateMenuRequest.id}
+        AND
+            lock_version = #{updateMenuRequest.lockVersion}
         </where>
     </update>
 </mapper>

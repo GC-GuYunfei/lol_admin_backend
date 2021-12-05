@@ -1,6 +1,5 @@
 package com.jiangfendou.loladmin.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jiangfendou.loladmin.common.ApiError;
@@ -10,6 +9,7 @@ import com.jiangfendou.loladmin.entity.SysUser;
 import com.jiangfendou.loladmin.enums.DeletedFlag;
 import com.jiangfendou.loladmin.enums.ErrorCode;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
+import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
@@ -17,6 +17,7 @@ import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import com.jiangfendou.loladmin.service.SysUserService;
 import com.jiangfendou.loladmin.util.RedisUtil;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -137,7 +138,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         }
         SysMenu perms = this.getOne(new QueryWrapper<SysMenu>()
             .eq("perms", updateMenuRequest.getPerms())
-            .eq("is_deleted", DeletedFlag.NOT_DELETED).le("id", updateMenuRequest.getId()));
+            .eq("is_deleted", DeletedFlag.NOT_DELETED));
         if (perms != null) {
             log.info("updateMenu() ---权限编码已存在， Perms = {}", updateMenuRequest.getPerms());
             throw new BusinessException(HttpStatus.BAD_REQUEST,
@@ -145,12 +146,37 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     String.format(ErrorCode.MENU_PERM_CODE_EXIST.getMessage(), updateMenuRequest.getPerms())));
         }
         // 修改menu数据
-        int updateCount = sysMenuMapper.updateMenu(updateMenuRequest);
-        if (updateCount > 0) {
-            sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+        if (sysMenuMapper.updateMenu(updateMenuRequest) == 0) {
+            log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", updateMenuRequest.getId());
+            throw new BusinessException(HttpStatus.LOCKED,
+                new ApiError(ErrorCode.LOCKED.getCode(), ErrorCode.LOCKED.getMessage()));
         }
+        sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
     }
 
+    @Override
+    public void deleteMenu(DeleteMenuRequest deleteMenuRequest) throws BusinessException {
+        SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
+            .eq("id", deleteMenuRequest.getId())
+            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+        if (Objects.isNull(sysMenu)) {
+            log.info("updateMenu() ---目标数据没有被找到， userId = {}", deleteMenuRequest.getId());
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+        }
+        deleteMenuRequest.setDeleteDatetime(LocalDateTime.now());
+        if (sysMenuMapper.deleteMenu(deleteMenuRequest) == 0) {
+            log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", deleteMenuRequest.getId());
+            throw new BusinessException(HttpStatus.LOCKED,
+                new ApiError(ErrorCode.LOCKED.getCode(), ErrorCode.LOCKED.getMessage()));
+        }
+        sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+    }
+
+
+    /**
+     * menu菜单转树状结构
+     * */
     private List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuTrees) {
         List<SysMenu> finalMenus = new ArrayList<>();
         sysMenuTrees.forEach(menu -> {
@@ -167,6 +193,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return finalMenus;
     }
 
+    /**
+     * menu实体转换成response实体
+     * */
     private List<MenuAuthorityResponse.Menu> convert(List<SysMenu> sysMenuTrees) {
         List<MenuAuthorityResponse.Menu> menuList = new ArrayList<>();
         sysMenuTrees.forEach(sysMenu -> {

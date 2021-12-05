@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.service;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
@@ -22,28 +23,39 @@ public interface SysMenuService extends IService<SysMenu> {
 
     /**
      * getMenuNav()
-     * @Param principal principal
+     * @param userId userId
      * @return MenuAuthorityResponse MenuAuthorityResponse
+     * @throws BusinessException BusinessException
      * */
     MenuAuthorityResponse getMenuNav(Long userId) throws BusinessException;
 
     /**
      * searchMenus()
      * @return List<SearchMenusResponse> List<SearchMenusResponse>
+     * @throws BusinessException BusinessException
      * */
     List<SearchMenusResponse> searchMenus() throws BusinessException;
 
     /**
      * getMenuDetail()
-     * @Param userId userId
+     * @param userId userId
      * @return List<GetMenuDetailResponse> List<GetMenuDetailResponse>
+     * @throws BusinessException BusinessException
      * */
     GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException;
 
     /**
      * updateMenu()
-     * @Param userId userId
+     * @param updateMenuRequest updateMenuRequest
+     * @throws  BusinessException BusinessException
      * */
     void updateMenu(UpdateMenuRequest updateMenuRequest) throws BusinessException;
+
+    /**
+     * deleteMenu()
+     * @param deleteMenuRequest deleteMenuRequest
+     * @throws  BusinessException BusinessException
+     * */
+    void deleteMenu(DeleteMenuRequest deleteMenuRequest) throws BusinessException;
 
 }

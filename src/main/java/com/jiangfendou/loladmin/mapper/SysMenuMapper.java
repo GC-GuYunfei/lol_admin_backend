@@ -3,8 +3,8 @@ package com.jiangfendou.loladmin.mapper;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jiangfendou.loladmin.entity.SysUser;
+import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
-import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -22,29 +22,37 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
 
     /**
      * searchUserList()
-     * @Param menuId menuId
-     * @Return List<SysUser>  List<SysUser>
+     * @param menuId menuId
+     * @return List<SysUser>  List<SysUser>
      * */
     List<SysUser> searchUserList(Long menuId);
 
     /**
      * getNavMenuIds()
-     * @Param userId userId
+     * @param userId userId
      * @return List<Long> List<Long>
      * */
     List<Long> getNavMenuIds(@Param("userId") Long userId);
 
     /**
      * updateMenu()
-     * @Param updateMenuRequest updateMenuRequest
+     * @param updateMenuRequest updateMenuRequest
+     * @return int int
      * */
     int updateMenu(@Param("updateMenuRequest") UpdateMenuRequest updateMenuRequest);
 
     /**
      * updateMenu()
-     * @Param navMenuIds navMenuIds
-     * @Return List<SysMenu> List<SysMenu>
+     * @param navMenuIds navMenuIds
+     * @return List<SysMenu> List<SysMenu>
      * */
     List<SysMenu> searchMenus(@Param("navMenuIds") List<Long> navMenuIds);
+
+    /**
+     * deleteMenu()
+     * @param deleteMenuRequest deleteMenuRequest
+     * @return int int
+     * */
+    int deleteMenu(DeleteMenuRequest deleteMenuRequest);
 
 }
