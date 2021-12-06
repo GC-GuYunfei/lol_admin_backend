@@ -4,16 +4,16 @@
     <delete id="deleteMenu">
         UPDATE sys_menu
         <trim prefix="set" suffixOverrides=",">
-
-            <if test="updateMenuRequest.deleteDatetime !=null">
-                delete_datetime = #{updateMenuRequest.deleteDatetime},
+            <if test="deleteMenuRequest.deleteDatetime !=null">
+                delete_datetime = #{deleteMenuRequest.deleteDatetime},
             </if>
-            lock_version = lock_version + 1
+            lock_version = lock_version + 1,
+            is_deleted = 1
         </trim>
         <where>
-            id = #{updateMenuRequest.id}
+            id = #{deleteMenuRequest.id}
         AND
-            lock_version = #{updateMenuRequest.lockVersion}
+            lock_version = #{deleteMenuRequest.lockVersion}
         </where>
     </delete>
 
@@ -40,27 +40,6 @@
             t1.is_deleted = 0
         AND
             t1.user_id = #{userId}
-    </select>
-    <select id="searchMenus" resultType="com.jiangfendou.loladmin.entity.SysMenu">
-        SELECT
-            id,
-            parent_id AS parentId,
-            `name`,
-            `path`,
-            perms,
-            component,
-            `type`,
-            icon,
-            status,
-            order_num AS orderNum
-        FROM sys_menu
-        WHERE
-            is_deleted = 0
-        AND
-            id IN
-        <foreach collection="navMenuIds" item="id" index="index" open="(" close=")" separator=",">
-            #{id}
-        </foreach>
     </select>
 
     <update id="updateMenu" parameterType="com.jiangfendou.loladmin.model.request.UpdateMenuRequest">

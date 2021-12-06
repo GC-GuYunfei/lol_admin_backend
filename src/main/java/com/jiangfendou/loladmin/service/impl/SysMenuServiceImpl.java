@@ -1,14 +1,17 @@
 package com.jiangfendou.loladmin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
-import com.jiangfendou.loladmin.enums.DeletedFlag;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.DeletedEnum;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
+import com.jiangfendou.loladmin.enums.StatusEnum;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
+import com.jiangfendou.loladmin.model.request.SaveMenuRequest;
 import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
@@ -61,11 +64,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             log.info("redis获取menu信息 -------{}, menus = {}", USER_MENU + userId, menus);
         } else {
             SysUser sysUser = sysUserService.getOne(new QueryWrapper<SysUser>().eq("id", userId)
-                .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+                .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
             if (sysUser == null) {
                 log.info("没有找到的指定用户：userId = {}", userId);
                 throw new BusinessException(HttpStatus.NOT_FOUND,
-                    new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                    new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
             }
             // 获取用户权限信息
             String userAuthorityInfo = sysUserService.getUserAuthorityInfo(sysUser.getId());
@@ -79,12 +82,16 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
             List<Long> navMenuIds = sysMenuMapper.getNavMenuIds(userId);
 
-            // 获取menus对象集合
-            List<SysMenu> sysMenus = sysMenuMapper.searchMenus(navMenuIds);
+            LambdaQueryWrapper<SysMenu> sysMenuLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            sysMenuLambdaQueryWrapper.in(SysMenu::getId, navMenuIds);
+            sysMenuLambdaQueryWrapper.eq(SysMenu::getIsDeleted, DeletedEnum.NOT_DELETED.getValue())
+                .eq(SysMenu::getStatus, StatusEnum.NORMAL.getValue());
+            List<SysMenu> sysMenus = sysMenuMapper.selectList(sysMenuLambdaQueryWrapper);
+
             if (navMenuIds.isEmpty() || sysMenus.isEmpty()) {
                 log.info("没有找到的指定用户菜单：userId = {}", userId);
                 throw new BusinessException(HttpStatus.NOT_FOUND,
-                    new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                    new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
             }
             // 转树状结构
             List<SysMenu> sysMenuTrees = buildTreeMenu(sysMenus);
@@ -101,11 +108,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public List<SearchMenusResponse> searchMenus() throws BusinessException {
         List<SysMenu> sysMenus = this.list(new QueryWrapper<SysMenu>().orderByAsc("order_num")
-            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
         if (sysMenus.isEmpty()) {
             log.info("menu list is empty");
             throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
         List<SysMenu> sysMenusTree = buildTreeMenu(sysMenus);
         return convertMenuList(sysMenusTree);
@@ -116,11 +123,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         GetMenuDetailResponse getMenuDetailResponse = new GetMenuDetailResponse();
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
             .eq("id", userId)
-            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
         if (Objects.isNull(sysMenu)) {
             log.info("getMenuDetail() ---目标数据没有被找到， userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
         BeanUtils.copyProperties(sysMenu, getMenuDetailResponse);
         return getMenuDetailResponse;
@@ -130,26 +137,26 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     public void updateMenu(UpdateMenuRequest updateMenuRequest) throws BusinessException {
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
             .eq("id", updateMenuRequest.getId())
-            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
         if (Objects.isNull(sysMenu)) {
             log.info("updateMenu() ---目标数据没有被找到， userId = {}", updateMenuRequest.getId());
             throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
         SysMenu perms = this.getOne(new QueryWrapper<SysMenu>()
             .eq("perms", updateMenuRequest.getPerms())
-            .eq("is_deleted", DeletedFlag.NOT_DELETED));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED).ne("id", updateMenuRequest.getId()));
         if (perms != null) {
             log.info("updateMenu() ---权限编码已存在， Perms = {}", updateMenuRequest.getPerms());
             throw new BusinessException(HttpStatus.BAD_REQUEST,
-                new ApiError(ErrorCode.MENU_PERM_CODE_EXIST.getCode(),
-                    String.format(ErrorCode.MENU_PERM_CODE_EXIST.getMessage(), updateMenuRequest.getPerms())));
+                new ApiError(ErrorCodeEnum.MENU_PERM_CODE_EXIST.getCode(),
+                    String.format(ErrorCodeEnum.MENU_PERM_CODE_EXIST.getMessage(), updateMenuRequest.getPerms())));
         }
         // 修改menu数据
         if (sysMenuMapper.updateMenu(updateMenuRequest) == 0) {
             log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", updateMenuRequest.getId());
             throw new BusinessException(HttpStatus.LOCKED,
-                new ApiError(ErrorCode.LOCKED.getCode(), ErrorCode.LOCKED.getMessage()));
+                new ApiError(ErrorCodeEnum.LOCKED.getCode(), ErrorCodeEnum.LOCKED.getMessage()));
         }
         sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
     }
@@ -158,19 +165,29 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     public void deleteMenu(DeleteMenuRequest deleteMenuRequest) throws BusinessException {
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
             .eq("id", deleteMenuRequest.getId())
-            .eq("is_deleted", DeletedFlag.NOT_DELETED.getValue()));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
         if (Objects.isNull(sysMenu)) {
             log.info("updateMenu() ---目标数据没有被找到， userId = {}", deleteMenuRequest.getId());
             throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
         deleteMenuRequest.setDeleteDatetime(LocalDateTime.now());
         if (sysMenuMapper.deleteMenu(deleteMenuRequest) == 0) {
             log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", deleteMenuRequest.getId());
             throw new BusinessException(HttpStatus.LOCKED,
-                new ApiError(ErrorCode.LOCKED.getCode(), ErrorCode.LOCKED.getMessage()));
+                new ApiError(ErrorCodeEnum.LOCKED.getCode(), ErrorCodeEnum.LOCKED.getMessage()));
         }
         sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+    }
+
+    @Override
+    public void saveMenu(SaveMenuRequest saveMenuRequest) {
+        SysMenu sysMenu = new SysMenu();
+        BeanUtils.copyProperties(saveMenuRequest, sysMenu);
+        boolean save = this.save(sysMenu);
+        if (save) {
+            sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+        }
     }
 
 

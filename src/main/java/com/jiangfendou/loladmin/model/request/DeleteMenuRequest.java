@@ -12,10 +12,10 @@ import lombok.Data;
 @Data
 public class DeleteMenuRequest {
 
-    @NotNull
+    @NotNull(message = "id:不能为空")
     private Long id;
 
-    @NotNull
+    @NotNull(message = "lockVersion:不能为空")
     private Integer lockVersion;
 
     private LocalDateTime deleteDatetime;

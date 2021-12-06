@@ -42,17 +42,10 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
     int updateMenu(@Param("updateMenuRequest") UpdateMenuRequest updateMenuRequest);
 
     /**
-     * updateMenu()
-     * @param navMenuIds navMenuIds
-     * @return List<SysMenu> List<SysMenu>
-     * */
-    List<SysMenu> searchMenus(@Param("navMenuIds") List<Long> navMenuIds);
-
-    /**
      * deleteMenu()
      * @param deleteMenuRequest deleteMenuRequest
      * @return int int
      * */
-    int deleteMenu(DeleteMenuRequest deleteMenuRequest);
+    int deleteMenu(@Param("deleteMenuRequest")DeleteMenuRequest deleteMenuRequest);
 
 }

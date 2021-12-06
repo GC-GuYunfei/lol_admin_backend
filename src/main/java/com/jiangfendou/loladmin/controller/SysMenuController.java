@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.controller;
 
 import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
+import com.jiangfendou.loladmin.model.request.SaveMenuRequest;
 import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
@@ -10,12 +11,11 @@ import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import java.util.List;
-import javax.validation.Valid;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +52,7 @@ public class SysMenuController extends BaseController {
         return ApiResponse.success(sysMenuService.getMenuDetail(userId));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     public ApiResponse updateMenu(@RequestBody @Validated UpdateMenuRequest updateMenuRequest) throws BusinessException {
         sysMenuService.updateMenu(updateMenuRequest);
         return ApiResponse.success();
@@ -61,6 +61,12 @@ public class SysMenuController extends BaseController {
     @DeleteMapping("/delete")
     public ApiResponse deleteMenu(@RequestBody @Validated DeleteMenuRequest deleteMenuRequest) throws BusinessException {
         sysMenuService.deleteMenu(deleteMenuRequest);
+        return ApiResponse.success();
+    }
+
+    @PostMapping("/save")
+    public ApiResponse saveMenu(@RequestBody @Validated SaveMenuRequest saveMenuRequest) {
+        sysMenuService.saveMenu(saveMenuRequest);
         return ApiResponse.success();
     }
 }

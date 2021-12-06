@@ -1,6 +1,5 @@
 package com.jiangfendou.loladmin.model.response;
 
-import com.jiangfendou.loladmin.entity.SysMenu;
 import lombok.Data;
 
 @Data
@@ -11,6 +10,8 @@ public class GetMenuDetailResponse {
     private Long id;
 
     private String name;
+
+    private Long parentId;
 
     /**
      * 菜单URL

@@ -3,12 +3,12 @@ package com.jiangfendou.loladmin.service;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jiangfendou.loladmin.model.request.SaveMenuRequest;
 import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
 import com.jiangfendou.loladmin.model.response.GetMenuDetailResponse;
 import com.jiangfendou.loladmin.model.response.MenuAuthorityResponse;
 import com.jiangfendou.loladmin.model.response.SearchMenusResponse;
-import java.security.Principal;
 import java.util.List;
 
 /**
@@ -57,5 +57,11 @@ public interface SysMenuService extends IService<SysMenu> {
      * @throws  BusinessException BusinessException
      * */
     void deleteMenu(DeleteMenuRequest deleteMenuRequest) throws BusinessException;
+
+    /**
+     * addMenu()
+     * @param addMenuRequest addMenuRequest
+     * */
+    void saveMenu(SaveMenuRequest addMenuRequest);
 
 }

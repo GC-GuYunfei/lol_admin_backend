@@ -5,15 +5,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
 
+
 /**
- * UpdateMenuRequest.
+ * AddMenuRequest.
  * @author jiangmh
  */
 @Data
-public class UpdateMenuRequest {
-
-    @NotNull(message = "id: 不能为空")
-    private Long id;
+public class SaveMenuRequest {
 
     /**
      * 父菜单ID，以及菜单为0
@@ -58,9 +56,6 @@ public class UpdateMenuRequest {
      */
     @NotNull(message = "orderNum: 不能为空")
     private Integer orderNum;
-
-    @NotNull(message = "lockVersion: 不能为空")
-    private Integer lockVersion;
 
     @NotNull(message = "status: 不能为空")
     private Integer status;

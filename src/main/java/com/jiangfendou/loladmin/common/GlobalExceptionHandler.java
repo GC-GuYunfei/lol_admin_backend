@@ -1,10 +1,8 @@
 package com.jiangfendou.loladmin.common;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import java.util.HashMap;
 import java.util.Map;
-import javax.validation.UnexpectedTypeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,8 +25,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handler(RuntimeException runtimeException) {
         log.error("运行时异常异常：-----------{}", runtimeException.getMessage());
         return new ResponseEntity<>(ApiResponse.failed(HttpStatus.INTERNAL_SERVER_ERROR,
-            new ApiError(ErrorCode.SYSTEM_ERROR.getCode(),
-                ErrorCode.SYSTEM_ERROR.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+            new ApiError(ErrorCodeEnum.SYSTEM_ERROR.getCode(),
+                ErrorCodeEnum.SYSTEM_ERROR.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -37,8 +34,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handler(IllegalArgumentException illegalArgumentException) {
         log.error("Assert异常：-----------{}", illegalArgumentException.getMessage());
         return new ResponseEntity<>(ApiResponse.failed(HttpStatus.INTERNAL_SERVER_ERROR,
-            new ApiError(ErrorCode.SYSTEM_ERROR.getCode(),
-                ErrorCode.SYSTEM_ERROR.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+            new ApiError(ErrorCodeEnum.SYSTEM_ERROR.getCode(),
+                ErrorCodeEnum.SYSTEM_ERROR.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -53,10 +50,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<ApiResponse> handler(AccessDeniedException accessDeniedException) {
-        log.error("拒绝访问：-----------{}", ErrorCode.NO_ACCESS_ALLOWED_ERROR.getMessage());
+        log.error("拒绝访问：-----------{}", ErrorCodeEnum.NO_ACCESS_ALLOWED_ERROR.getMessage());
         return new ResponseEntity<>(ApiResponse.failed(HttpStatus.UNAUTHORIZED,
-            new ApiError(ErrorCode.NO_ACCESS_ALLOWED_ERROR.getCode(),
-                ErrorCode.NO_ACCESS_ALLOWED_ERROR.getMessage())), HttpStatus.UNAUTHORIZED);
+            new ApiError(ErrorCodeEnum.NO_ACCESS_ALLOWED_ERROR.getCode(),
+                ErrorCodeEnum.NO_ACCESS_ALLOWED_ERROR.getMessage())), HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -65,7 +62,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errorMap = this.getErrorMap(bindException);
         log.error("参数异常：-----------{}", errorMap);
         return new ResponseEntity<>(ApiResponse.failed(HttpStatus.BAD_REQUEST,
-            new ApiError(ErrorCode.BAD_REQUEST_ERROR.getCode(),
+            new ApiError(ErrorCodeEnum.BAD_REQUEST_ERROR.getCode(),
                 errorMap.toString())), HttpStatus.BAD_REQUEST);
     }
 

@@ -5,7 +5,7 @@ package com.jiangfendou.loladmin.enums;
  *
  * @author lin.duan
  */
-public enum ErrorCode {
+public enum ErrorCodeEnum {
     //common
     SYSTEM_ERROR("e.jfd.1001", "系统异常"),
     ACCOUNT_PASSWORD_ERROR("e.jfd.1002", "账户或者密码输入错误"),
@@ -29,7 +29,7 @@ public enum ErrorCode {
      *
      * @param code code of error code
      */
-    ErrorCode(String code, String message) {
+    ErrorCodeEnum(String code, String message) {
         this.code = code;
         this.message = message;
     }

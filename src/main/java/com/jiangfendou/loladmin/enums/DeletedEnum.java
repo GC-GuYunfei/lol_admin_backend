@@ -5,7 +5,7 @@ package com.jiangfendou.loladmin.enums;
  *
  * @author jiangfendou
  */
-public enum DeletedFlag {
+public enum DeletedEnum {
 
     /**
      * Record Not Deleted.
@@ -19,7 +19,7 @@ public enum DeletedFlag {
 
     private final Boolean value;
 
-    DeletedFlag(Boolean value) {
+    DeletedEnum(Boolean value) {
         this.value = value;
     }
 

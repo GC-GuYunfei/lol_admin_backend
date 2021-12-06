@@ -5,8 +5,8 @@ import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
-import com.jiangfendou.loladmin.enums.DeletedFlag;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.DeletedEnum;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
 import com.jiangfendou.loladmin.mapper.SysRoleMapper;
 import com.jiangfendou.loladmin.mapper.SysUserMapper;
@@ -66,7 +66,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // ROLE_admin,sys:user:list .....
         String authority = "";
         SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
-            .eq("is_deleted", DeletedFlag.NOT_DELETED));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED));
         if (redisUtil.hasKey(GRANTED_AUTHORITY + sysUser.getUsername())) {
             authority = (String)redisUtil.get(GRANTED_AUTHORITY + sysUser.getUsername());
             log.info("redis获取用户信息 -------{}, Authority = {}", GRANTED_AUTHORITY + sysUser.getUsername(), authority);
@@ -116,11 +116,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public SysUserResponse getUserInfo(Long userId) throws BusinessException {
         SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
-            .eq("is_deleted", DeletedFlag.NOT_DELETED));
+            .eq("is_deleted", DeletedEnum.NOT_DELETED));
         if (Objects.isNull(sysUser)) {
             log.info("没有找到的指定用户信息：userId = {}", userId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
-                new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
         return SysUserResponse.convert(sysUser);
     }
