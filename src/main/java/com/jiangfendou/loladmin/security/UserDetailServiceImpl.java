@@ -1,7 +1,7 @@
 package com.jiangfendou.loladmin.security;
 
 import com.jiangfendou.loladmin.entity.SysUser;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.service.SysUserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
         SysUser sysUser = sysUserService.getByUseName(username);
         if (sysUser == null) {
-            throw new UsernameNotFoundException(ErrorCode.ACCOUNT_PASSWORD_ERROR.getMessage());
+            throw new UsernameNotFoundException(ErrorCodeEnum.ACCOUNT_PASSWORD_ERROR.getMessage());
         }
         return new AccountUser(sysUser.getId(), sysUser.getUsername(),
                     sysUser.getPassword(), getUserAuthority(sysUser.getId()));

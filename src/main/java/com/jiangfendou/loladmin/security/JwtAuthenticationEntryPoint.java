@@ -4,7 +4,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.ApiResponse;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -30,11 +30,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         httpServletResponse.setContentType("application/json;charset=UTF-8");
         ServletOutputStream servletOutputStream = httpServletResponse.getOutputStream();
         httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-        log.error("您还未登录，请先登录：-----------{}", ErrorCode.NOT_LOGIN_ERROR.getMessage());
+        log.error("您还未登录，请先登录：-----------{}", ErrorCodeEnum.NOT_LOGIN_ERROR.getMessage());
         ApiResponse<Object> failedResponse =
             ApiResponse.failed(HttpStatus.UNAUTHORIZED,
-                new ApiError(ErrorCode.NOT_LOGIN_ERROR.getCode(),
-                    ErrorCode.NOT_LOGIN_ERROR.getMessage()));
+                new ApiError(ErrorCodeEnum.NOT_LOGIN_ERROR.getCode(),
+                    ErrorCodeEnum.NOT_LOGIN_ERROR.getMessage()));
         JSONObject jsonFailed = new JSONObject(JSONUtil.toJsonStr(failedResponse));
         String httpStatus = (String)jsonFailed.get("httpStatus");
         String[] arraySuccess = httpStatus.split(" ");

@@ -4,8 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.TokenException;
 import com.jiangfendou.loladmin.entity.SysUser;
-import com.jiangfendou.loladmin.enums.ErrorCode;
-import com.jiangfendou.loladmin.security.JwtAccessDeniedHandler;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.service.SysUserService;
 import com.jiangfendou.loladmin.util.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -73,14 +72,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         if (claimByToken == null) {
             throw new TokenException(HttpStatus.UNAUTHORIZED,
-                new ApiError(ErrorCode.INVALID_TOKEN.getCode(),
-                    ErrorCode.INVALID_TOKEN.getMessage()));
+                new ApiError(ErrorCodeEnum.INVALID_TOKEN.getCode(),
+                    ErrorCodeEnum.INVALID_TOKEN.getMessage()));
         }
 
         if (jwtUtils.isTokenExpired(claimByToken)) {
             throw new TokenException(HttpStatus.UNAUTHORIZED,
-                new ApiError(ErrorCode.EXPIRED_TOKEN.getCode(),
-                    ErrorCode.EXPIRED_TOKEN.getMessage()));
+                new ApiError(ErrorCodeEnum.EXPIRED_TOKEN.getCode(),
+                    ErrorCodeEnum.EXPIRED_TOKEN.getMessage()));
         }
         return claimByToken;
     }

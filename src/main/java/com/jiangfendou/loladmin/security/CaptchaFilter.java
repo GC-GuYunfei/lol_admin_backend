@@ -3,7 +3,7 @@ package com.jiangfendou.loladmin.security;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.LoginException;
 import com.jiangfendou.loladmin.common.Const;
-import com.jiangfendou.loladmin.enums.ErrorCode;
+import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.util.RedisUtil;
 import java.io.IOException;
 import java.util.Objects;
@@ -65,21 +65,21 @@ public class CaptchaFilter extends OncePerRequestFilter {
         String key = httpServletRequest.getParameter(KEY);
         if (StringUtils.isBlank(code) || StringUtils.isBlank(key)) {
             log.error("code和key不能为空");
-            httpServletRequest.setAttribute("errorCode", ErrorCode.CODE_ERROR.getCode());
-            httpServletRequest.setAttribute("errorMessage", ErrorCode.CODE_ERROR.getMessage());
+            httpServletRequest.setAttribute("errorCode", ErrorCodeEnum.CODE_ERROR.getCode());
+            httpServletRequest.setAttribute("errorMessage", ErrorCodeEnum.CODE_ERROR.getMessage());
             throw new LoginException(HttpStatus.BAD_REQUEST,
-                new ApiError(ErrorCode.CODE_ERROR.getCode(),
-                    ErrorCode.CODE_ERROR.getMessage()));
+                new ApiError(ErrorCodeEnum.CODE_ERROR.getCode(),
+                    ErrorCodeEnum.CODE_ERROR.getMessage()));
         }
 
         Object codeRedis = redisUtil.hget(Const.CAPTCHA_KEY, key);
         if (!Objects.equals(code, codeRedis)) {
             log.error("code验证失败：code = {}, redisCode = {}, key = {}", code, codeRedis, key);
-            httpServletRequest.setAttribute("errorCode", ErrorCode.CODE_ERROR.getCode());
-            httpServletRequest.setAttribute("errorMessage", ErrorCode.CODE_ERROR.getMessage());
+            httpServletRequest.setAttribute("errorCode", ErrorCodeEnum.CODE_ERROR.getCode());
+            httpServletRequest.setAttribute("errorMessage", ErrorCodeEnum.CODE_ERROR.getMessage());
             throw new LoginException(HttpStatus.BAD_REQUEST,
-                new ApiError(ErrorCode.CODE_ERROR.getCode(),
-                    ErrorCode.CODE_ERROR.getMessage()));
+                new ApiError(ErrorCodeEnum.CODE_ERROR.getCode(),
+                    ErrorCodeEnum.CODE_ERROR.getMessage()));
         }
         // 一次性使用
         redisUtil.hdel(Const.CAPTCHA_KEY, key);
