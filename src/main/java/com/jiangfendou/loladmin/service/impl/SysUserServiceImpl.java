@@ -1,5 +1,6 @@
 package com.jiangfendou.loladmin.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,6 +13,7 @@ import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
 import com.jiangfendou.loladmin.mapper.SysRoleMapper;
 import com.jiangfendou.loladmin.mapper.SysUserMapper;
+import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
 import com.jiangfendou.loladmin.model.response.RoleResponse;
 import com.jiangfendou.loladmin.model.response.SearchUserResponse;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 /**
@@ -71,9 +74,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         String authority = "";
         SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
             .eq("is_deleted", DeletedEnum.NOT_DELETED));
-        if (redisUtil.hasKey(GRANTED_AUTHORITY + sysUser.getUsername())) {
-            authority = (String)redisUtil.get(GRANTED_AUTHORITY + sysUser.getUsername());
-            log.info("redis获取用户信息 -------{}, Authority = {}", GRANTED_AUTHORITY + sysUser.getUsername(), authority);
+        if (redisUtil.hasKey(GRANTED_AUTHORITY + sysUser.getId())) {
+            authority = (String)redisUtil.get(GRANTED_AUTHORITY + sysUser.getId());
+            log.info("redis获取用户信息 -------{}, Authority = {}", GRANTED_AUTHORITY + sysUser.getId(), authority);
         } else {
             // 获取角色
             List<RoleResponse> roles = sysRoleMapper.searchRoleList(userId);
@@ -89,31 +92,36 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     .collect(Collectors.joining(","));
                 authority = authority.concat(",").concat(menuPerms);
             }
-            redisUtil.set(GRANTED_AUTHORITY + sysUser.getUsername(), authority, 60*60);
+            redisUtil.set(GRANTED_AUTHORITY + userId, authority, 60*60);
         }
 
         return authority;
     }
 
     @Override
-    public void clearUserAuthorityInfo(String username, Long userId) {
-        redisUtil.del(GRANTED_AUTHORITY + username);
+    public void clearUserAuthorityInfo(Long userId) {
+        log.info("删除redis数据，userId = {}" , userId);
+        redisUtil.del(GRANTED_AUTHORITY + userId);
         redisUtil.del(USER_MENU + userId);
     }
 
     @Override
     public void clearUserAuthorityInfoByRoleId(Long rolId) {
+        log.info("删除redis数据，userId = {}" , rolId);
         List<SysUser> sysUsers = sysRoleMapper.searchUserList(rolId);
         sysUsers.forEach(sysUser -> {
             redisUtil.del(GRANTED_AUTHORITY + sysUser.getUsername());
         });
     }
 
+
     @Override
     public void clearUserAuthorityInfoByMenuId(Long menuId) {
+        log.info("删除redis数据，menuId = {}" , menuId);
         List<SysUser> sysUsers = sysMenuMapper.searchUserList(menuId);
         sysUsers.forEach(sysUser -> {
-            redisUtil.del(GRANTED_AUTHORITY + sysUser.getUsername());
+            redisUtil.del(GRANTED_AUTHORITY + sysUser.getId());
+            redisUtil.del(USER_MENU + sysUser.getId());
         });
     }
 
@@ -135,5 +143,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         IPage<SearchUserResponse> page = new Page<>(searchUserRequest.getCurrent(),searchUserRequest.getSize());
         IPage<SearchUserResponse> result = sysUserMapper.searchUser(page, searchUserRequest);
         return result;
+    }
+
+    @Override
+    public void saveUser(SaveUserRequest searchUserRequest) {
+        String id = IdUtil.simpleUUID();
+
     }
 }

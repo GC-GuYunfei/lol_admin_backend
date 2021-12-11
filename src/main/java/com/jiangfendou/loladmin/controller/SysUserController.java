@@ -3,10 +3,12 @@ package com.jiangfendou.loladmin.controller;
 
 import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
+import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
 import com.jiangfendou.loladmin.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,10 +35,12 @@ public class SysUserController extends BaseController {
     @GetMapping("/list")
     public ApiResponse searchUser(SearchUserRequest searchUserRequest) {
         return ApiResponse.success(sysUserService.searchUser(searchUserRequest));
+
     }
 
-    @GetMapping("/save")
-    public ApiResponse saveUser(SearchUserRequest searchUserRequest) {
-        return ApiResponse.success(sysUserService.searchUser(searchUserRequest));
+    @PostMapping("/save")
+    public ApiResponse saveUser(SaveUserRequest searchUserRequest) {
+        sysUserService.saveUser(searchUserRequest);
+        return ApiResponse.success();
     }
 }

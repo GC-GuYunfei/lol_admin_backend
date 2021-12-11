@@ -158,7 +158,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             throw new BusinessException(HttpStatus.LOCKED,
                 new ApiError(ErrorCodeEnum.LOCKED.getCode(), ErrorCodeEnum.LOCKED.getMessage()));
         }
-        sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+        sysUserService.clearUserAuthorityInfoByMenuId(sysMenu.getId());
     }
 
     @Override
@@ -171,13 +171,19 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             throw new BusinessException(HttpStatus.NOT_FOUND,
                 new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }
+
+        // 如果不是最低级别的菜单需要做校验
+
         deleteMenuRequest.setDeleteDatetime(LocalDateTime.now());
         if (sysMenuMapper.deleteMenu(deleteMenuRequest) == 0) {
             log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", deleteMenuRequest.getId());
             throw new BusinessException(HttpStatus.LOCKED,
                 new ApiError(ErrorCodeEnum.LOCKED.getCode(), ErrorCodeEnum.LOCKED.getMessage()));
         }
-        sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+
+        // 删除关联表的数据
+
+        sysUserService.clearUserAuthorityInfoByMenuId(sysMenu.getId());
     }
 
     @Override
@@ -186,7 +192,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         BeanUtils.copyProperties(saveMenuRequest, sysMenu);
         boolean save = this.save(sysMenu);
         if (save) {
-            sysUserService.clearUserAuthorityInfo(sysMenu.getName(), sysMenu.getId());
+            sysUserService.clearUserAuthorityInfo(saveMenuRequest.getUserId());
         }
     }
 
