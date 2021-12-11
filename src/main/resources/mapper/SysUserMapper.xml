@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiangfendou.loladmin.mapper.SysUserMapper">
 
+    <resultMap id="SysUserMap" type="com.jiangfendou.loladmin.model.response.SearchUserResponse">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="avatar" column="avatar"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="city" column="city"/>
+        <result property="lastLogin" column="last_login"/>
+        <result property="lockVersion" column="lock_version"/>
+        <result property="status" column="status"/>
+        <collection property="roles" ofType="com.jiangfendou.loladmin.model.response.SearchUserResponse$RoleResponse">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+        </collection>
+    </resultMap>
+
     <select id="getNavMenusIds" resultType="java.lang.Long">
         SELECT
             DISTINCT t2.menu_id
@@ -13,5 +29,29 @@
         AND
               t1.user_id = #{userId}
 
+    </select>
+
+    <select id="searchUser" resultMap="SysUserMap">
+        SELECT
+            t1.id,
+            t1.username,
+            t1.avatar,
+            t1.phone,
+            t1.email,
+            t1.city,
+            t1.last_login,
+            t1.status,
+            t1.lock_version,
+            t3.id,
+            t3.name
+        FROM sys_user t1
+        LEFT JOIN sys_user_role t2 ON t1.id = t2.user_id AND t2.is_deleted = 0
+        LEFT JOIN sys_role t3 ON t3.id = t2.role_id AND t3.is_deleted = 0
+        <where>
+            t1.is_deleted = 0
+            <if test="searchUserRequest.username != null and searchUserRequest.username != ''">
+                AND t1.username = #{searchUserRequest.username}
+            </if>
+        </where>
     </select>
 </mapper>

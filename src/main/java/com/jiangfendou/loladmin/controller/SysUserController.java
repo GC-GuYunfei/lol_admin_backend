@@ -3,6 +3,7 @@ package com.jiangfendou.loladmin.controller;
 
 import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
+import com.jiangfendou.loladmin.model.request.SearchUserRequest;
 import com.jiangfendou.loladmin.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,4 +30,13 @@ public class SysUserController extends BaseController {
         return ApiResponse.success(sysUserService.getUserInfo(userId));
     }
 
+    @GetMapping("/list")
+    public ApiResponse searchUser(SearchUserRequest searchUserRequest) {
+        return ApiResponse.success(sysUserService.searchUser(searchUserRequest));
+    }
+
+    @GetMapping("/save")
+    public ApiResponse saveUser(SearchUserRequest searchUserRequest) {
+        return ApiResponse.success(sysUserService.searchUser(searchUserRequest));
+    }
 }

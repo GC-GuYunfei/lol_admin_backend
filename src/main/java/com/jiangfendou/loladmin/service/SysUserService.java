@@ -1,9 +1,13 @@
 package com.jiangfendou.loladmin.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.response.SearchUserResponse;
 import com.jiangfendou.loladmin.model.response.SysUserResponse;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -56,4 +60,11 @@ public interface SysUserService extends IService<SysUser> {
      * @throws BusinessException BusinessException
      * */
     SysUserResponse getUserInfo(Long userId) throws BusinessException;
+
+    /**
+     * searchUser()
+     * @param searchUserRequest searchUserRequest
+     * @return SearchUserResponse SearchUserResponse
+     * */
+    IPage<SearchUserResponse> searchUser(SearchUserRequest searchUserRequest);
 }

@@ -55,4 +55,11 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
      * */
     int deleteMenu(DeleteMenuRequest deleteMenuRequest);
 
+    /**
+     * deleteMenu()
+     * @param deleteMenuRequest deleteMenuRequest
+     * @return int int
+     * */
+//     searchUser(DeleteMenuRequest deleteMenuRequest);
+
 }

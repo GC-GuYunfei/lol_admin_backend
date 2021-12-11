@@ -1,26 +1,19 @@
-package com.jiangfendou.loladmin.entity;
+package com.jiangfendou.loladmin.model.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author jobob
- * @since 2021-11-07
+ * SearchUserResponse.
+ * @author jiangmh
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SysUser extends BaseEntity {
+public class SearchUserResponse {
 
-    private static final long serialVersionUID = 1L;
+    private Long id;
 
     private String username;
-
-    private String password;
 
     /**
      * 头像
@@ -45,4 +38,13 @@ public class SysUser extends BaseEntity {
 
     private Integer status;
 
+    private List<RoleResponse> roles;
+
+    @Data
+    private static class RoleResponse {
+
+        private Long id;
+
+        private String name;
+    }
 }

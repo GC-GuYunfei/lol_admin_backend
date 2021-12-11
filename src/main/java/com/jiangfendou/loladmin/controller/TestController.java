@@ -7,6 +7,8 @@ import com.jiangfendou.loladmin.service.SysUserService;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +55,24 @@ public class TestController {
     }
 
     public static void main(String[] args) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        Date returnDate = dateFormat.parse("2021-12-07 13:00");
-        Date pickUpDate = dateFormat.parse("2021-12-04 00:00");
-        long minutes = (returnDate.getTime() - pickUpDate.getTime()) / 1000 / 60;
-        long hour =  (minutes - 240) / 60;
-        hour = minutes % 60 == 0 ? hour : (hour + 1);
-        Long day = hour / 24;
-        day = hour % 24 == 0 ? day : (day + 1);
-        Integer rental = day.intValue();
-        System.out.println("rental:" + rental);
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        Date returnDate = dateFormat.parse("2021-12-07 13:00");
+//        Date pickUpDate = dateFormat.parse("2021-12-04 00:00");
+//        long minutes = (returnDate.getTime() - pickUpDate.getTime()) / 1000 / 60;
+//        long hour =  (minutes - 240) / 60;
+//        hour = minutes % 60 == 0 ? hour : (hour + 1);
+//        Long day = hour / 24;
+//        day = hour % 24 == 0 ? day : (day + 1);
+//        Integer rental = day.intValue();
+//        System.out.println("rental:" + rental);
+//        String re = "\\d{4}-\\d{2}-\\{2}'T'\\d{2}:\\d{2}:\\d{2}";
+//        String data = "2021-10-10T10:10:10";
+//        if (data.matches(re)) {
+//            System.out.println("false" + false);
+//        }
+
+        OffsetDateTime parse = OffsetDateTime
+            .parse("2021-10-10T10:10:10+07:00", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+        System.out.println(parse);
     }
 }

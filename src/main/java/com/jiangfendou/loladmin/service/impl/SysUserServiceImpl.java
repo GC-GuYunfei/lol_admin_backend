@@ -1,6 +1,8 @@
 package com.jiangfendou.loladmin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
@@ -10,7 +12,9 @@ import com.jiangfendou.loladmin.enums.ErrorCode;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
 import com.jiangfendou.loladmin.mapper.SysRoleMapper;
 import com.jiangfendou.loladmin.mapper.SysUserMapper;
+import com.jiangfendou.loladmin.model.request.SearchUserRequest;
 import com.jiangfendou.loladmin.model.response.RoleResponse;
+import com.jiangfendou.loladmin.model.response.SearchUserResponse;
 import com.jiangfendou.loladmin.model.response.SysUserResponse;
 import com.jiangfendou.loladmin.service.SysMenuService;
 import com.jiangfendou.loladmin.service.SysUserService;
@@ -123,5 +127,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 new ApiError(ErrorCode.NOT_FOUND.getCode(), ErrorCode.NOT_FOUND.getMessage()));
         }
         return SysUserResponse.convert(sysUser);
+    }
+
+    @Override
+    public IPage<SearchUserResponse> searchUser(SearchUserRequest searchUserRequest) {
+        // 创建分页参数
+        IPage<SearchUserResponse> page = new Page<>(searchUserRequest.getCurrent(),searchUserRequest.getSize());
+        IPage<SearchUserResponse> result = sysUserMapper.searchUser(page, searchUserRequest);
+        return result;
     }
 }
