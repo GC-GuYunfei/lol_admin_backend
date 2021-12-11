@@ -1,6 +1,5 @@
 package com.jiangfendou.loladmin.service.impl;
 
-import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,9 +25,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -49,6 +49,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     private static final String ROLE = "ROLE_";
 
+    private static final String DEFAULT_PASSWORD = "888888";
+
+    private static final String DEFAULT_AVATAR = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+
     @Autowired
     private SysUserMapper sysUserMapper;
 
@@ -63,6 +67,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public SysUser getByUseName(String userName) {
@@ -146,8 +153,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public void saveUser(SaveUserRequest searchUserRequest) {
-        String id = IdUtil.simpleUUID();
+    public void saveUser(SaveUserRequest saveUserRequest) {
+        SysUser sysUser = new SysUser();
+        BeanUtils.copyProperties(saveUserRequest, sysUser);
+        // 默认密码
+        sysUser.setPassword((sysUser.getPassword() == null || Objects.equals(sysUser.getPassword(), ""))
+            ? bCryptPasswordEncoder.encode(DEFAULT_PASSWORD) : sysUser.getPassword());
 
+        // 默认头像
+        sysUser.setAvatar(DEFAULT_AVATAR);
+        this.save(sysUser);
     }
 }

@@ -71,8 +71,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * saveUser()
-     * @param searchUserRequest searchUserRequest
-     * @return SearchUserResponse SearchUserResponse
+     * @param saveUserRequest saveUserRequest
      * */
-    void saveUser(SaveUserRequest searchUserRequest);
+    void saveUser(SaveUserRequest saveUserRequest);
 }
