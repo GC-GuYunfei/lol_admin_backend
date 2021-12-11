@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
+import com.jiangfendou.loladmin.entity.SysRoleMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.jiangfendou.loladmin.enums.DeletedEnum;
 import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
 import com.jiangfendou.loladmin.enums.StatusEnum;
 import com.jiangfendou.loladmin.mapper.SysMenuMapper;
+import com.jiangfendou.loladmin.mapper.SysRoleMenuMapper;
 import com.jiangfendou.loladmin.model.request.SaveMenuRequest;
 import com.jiangfendou.loladmin.model.request.DeleteMenuRequest;
 import com.jiangfendou.loladmin.model.request.UpdateMenuRequest;
@@ -51,6 +53,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
     @Autowired
     private SysMenuMapper sysMenuMapper;
+
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
 
     @Autowired
     private RedisUtil redisUtil;
@@ -173,7 +178,12 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         }
 
         // 如果不是最低级别的菜单需要做校验
-
+        int count = this.count(new QueryWrapper<SysMenu>().eq("parent_id", deleteMenuRequest.getId()));
+        if (count > 0) {
+            log.info("deleteMenu() ---目标文件存在子节点， menuId = {}", deleteMenuRequest.getId());
+            throw new BusinessException(HttpStatus.FORBIDDEN,
+                new ApiError(ErrorCodeEnum.EXIST_CHILD_NODES.getCode(), ErrorCodeEnum.EXIST_CHILD_NODES.getMessage()));
+        }
         deleteMenuRequest.setDeleteDatetime(LocalDateTime.now());
         if (sysMenuMapper.deleteMenu(deleteMenuRequest) == 0) {
             log.info("updateMenu() ---目标数据已经被锁定， menuId = {}", deleteMenuRequest.getId());
@@ -182,7 +192,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         }
 
         // 删除关联表的数据
-
+        SysRoleMenu sysRoleMenu = new SysRoleMenu();
+        sysRoleMenu.setIsDeleted(DeletedEnum.DELETED.getValue());
+        sysRoleMenuMapper.update(sysRoleMenu, new QueryWrapper<SysRoleMenu>()
+            .eq("menu_id", deleteMenuRequest.getId()));
         sysUserService.clearUserAuthorityInfoByMenuId(sysMenu.getId());
     }
 
@@ -191,9 +204,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         SysMenu sysMenu = new SysMenu();
         BeanUtils.copyProperties(saveMenuRequest, sysMenu);
         boolean save = this.save(sysMenu);
-        if (save) {
-            sysUserService.clearUserAuthorityInfo(saveMenuRequest.getUserId());
-        }
     }
 
 

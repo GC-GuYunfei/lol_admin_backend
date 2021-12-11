@@ -22,7 +22,7 @@ public class BaseEntity {
     /**
      * 0: enabled; 1: disabled
      */
-    private Integer isDeleted;
+    private boolean isDeleted;
 
     private String creator;
 
@@ -32,4 +32,11 @@ public class BaseEntity {
 
     private LocalDateTime updateDatetime;
 
+    public boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 }
