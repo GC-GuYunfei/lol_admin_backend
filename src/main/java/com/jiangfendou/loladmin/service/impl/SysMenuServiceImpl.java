@@ -33,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -139,6 +140,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateMenu(UpdateMenuRequest updateMenuRequest) throws BusinessException {
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
             .eq("id", updateMenuRequest.getId())
@@ -167,6 +169,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMenu(DeleteMenuRequest deleteMenuRequest) throws BusinessException {
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
             .eq("id", deleteMenuRequest.getId())
@@ -200,10 +203,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveMenu(SaveMenuRequest saveMenuRequest) {
         SysMenu sysMenu = new SysMenu();
         BeanUtils.copyProperties(saveMenuRequest, sysMenu);
-        boolean save = this.save(sysMenu);
+        this.save(sysMenu);
     }
 
 

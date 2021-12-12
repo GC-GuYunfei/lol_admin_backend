@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangfendou.loladmin.common.ApiError;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.entity.SysMenu;
+import com.jiangfendou.loladmin.entity.SysRoleMenu;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.jiangfendou.loladmin.enums.DeletedEnum;
 import com.jiangfendou.loladmin.enums.ErrorCodeEnum;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -153,12 +155,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveUser(SaveUserRequest saveUserRequest) {
         SysUser sysUser = new SysUser();
         BeanUtils.copyProperties(saveUserRequest, sysUser);
         // 默认密码
         sysUser.setPassword((sysUser.getPassword() == null || Objects.equals(sysUser.getPassword(), ""))
-            ? bCryptPasswordEncoder.encode(DEFAULT_PASSWORD) : sysUser.getPassword());
+            ? bCryptPasswordEncoder.encode(DEFAULT_PASSWORD) :  bCryptPasswordEncoder.encode(sysUser.getPassword()));
 
         // 默认头像
         sysUser.setAvatar(DEFAULT_AVATAR);
