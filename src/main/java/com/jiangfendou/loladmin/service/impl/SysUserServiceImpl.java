@@ -15,6 +15,7 @@ import com.jiangfendou.loladmin.mapper.SysRoleMapper;
 import com.jiangfendou.loladmin.mapper.SysUserMapper;
 import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.request.UpdateUserRequest;
 import com.jiangfendou.loladmin.model.response.GetUserDetailResponse;
 import com.jiangfendou.loladmin.model.response.RoleResponse;
 import com.jiangfendou.loladmin.model.response.SearchUserResponse;
@@ -157,7 +158,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveUser(SaveUserRequest saveUserRequest) {
+    public void saveUser(SaveUserRequest saveUserRequest) throws BusinessException {
+
+        // 检验用户名称是否存在
+        SysUser user = this.getOne(new QueryWrapper<SysUser>().eq("username", saveUserRequest.getUsername())
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
+        if (!Objects.isNull(user)) {
+            log.info("用户名称已经存在：username = {}", saveUserRequest.getUsername());
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                new ApiError(ErrorCodeEnum.USERNAME_EXIST_ERROR.getCode(),
+                    ErrorCodeEnum.USERNAME_EXIST_ERROR.getMessage()));
+        }
         SysUser sysUser = new SysUser();
         BeanUtils.copyProperties(saveUserRequest, sysUser);
         // 默认密码
@@ -181,5 +192,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         GetUserDetailResponse getUserDetailResponse = new GetUserDetailResponse();
         BeanUtils.copyProperties(sysUser, getUserDetailResponse);
         return getUserDetailResponse;
+    }
+
+    @Override
+    public void updateUser(UpdateUserRequest updateUserRequest) throws BusinessException {
+
+        SysUser user = this.getOne(new QueryWrapper<SysUser>().eq("username", updateUserRequest.getUsername())
+            .ne("id", updateUserRequest.getId()).eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
+        if (!Objects.isNull(user)) {
+            log.info("用户名称已经存在：username = {}", updateUserRequest.getUsername());
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                new ApiError(ErrorCodeEnum.USERNAME_EXIST_ERROR.getCode(),
+                    ErrorCodeEnum.USERNAME_EXIST_ERROR.getMessage()));
+        }
+
+        int updateUserCount = sysUserMapper.updateUser(updateUserRequest);
+        if (updateUserCount == 0) {
+            log.info("updateUser() ---目标数据已经被锁定， userId = {}", updateUserRequest.getId());
+            throw new BusinessException(HttpStatus.LOCKED,
+                new ApiError(ErrorCodeEnum.LOCKED.getCode(), ErrorCodeEnum.LOCKED.getMessage()));
+        }
     }
 }

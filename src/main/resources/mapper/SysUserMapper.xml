@@ -17,6 +17,32 @@
             <result property="name" column="name"/>
         </collection>
     </resultMap>
+    <update id="updateUser">
+        UPDATE sys_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="updateUserRequest.username != null and updateUserRequest.username != ''">
+                username = #{updateUserRequest.username},
+            </if>
+            <if test="updateUserRequest.phone != null and updateUserRequest.phone != ''">
+                phone = #{updateUserRequest.phone},
+            </if>
+            <if test="updateUserRequest.email != null and updateUserRequest.email != ''">
+                email = #{updateUserRequest.email},
+            </if>
+            <if test="updateUserRequest.city != null and updateUserRequest.city != ''">
+                city = #{updateUserRequest.city},
+            </if>
+            <if test="updateUserRequest.status != null">
+                status = #{updateUserRequest.status},
+            </if>
+            lock_version = lock_version + 1,
+        </trim>
+        <where>
+            id = #{updateUserRequest.id}
+            AND
+            lock_version = #{updateUserRequest.lockVersion}
+        </where>
+    </update>
 
     <select id="getNavMenusIds" resultType="java.lang.Long">
         SELECT

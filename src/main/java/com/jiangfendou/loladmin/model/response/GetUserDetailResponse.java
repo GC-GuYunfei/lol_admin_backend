@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class GetUserDetailResponse {
 
+    private Long id;
+
     private String username;
 
     private String password;
@@ -20,4 +22,6 @@ public class GetUserDetailResponse {
     private String city;
 
     private Integer status;
+
+    private Integer lockVersion;
 }

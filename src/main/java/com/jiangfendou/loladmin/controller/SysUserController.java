@@ -5,6 +5,7 @@ import com.jiangfendou.loladmin.common.ApiResponse;
 import com.jiangfendou.loladmin.common.BusinessException;
 import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.request.UpdateUserRequest;
 import com.jiangfendou.loladmin.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,7 +43,7 @@ public class SysUserController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ApiResponse saveUser(@RequestBody @Validated SaveUserRequest searchUserRequest) {
+    public ApiResponse saveUser(@RequestBody @Validated SaveUserRequest searchUserRequest) throws BusinessException {
         sysUserService.saveUser(searchUserRequest);
         return ApiResponse.success();
     }
@@ -50,5 +51,11 @@ public class SysUserController extends BaseController {
     @GetMapping("/detail")
     public ApiResponse detailUser(Long userId) throws BusinessException {
         return ApiResponse.success(sysUserService.detailUser(userId));
+    }
+
+    @PostMapping("/update")
+    public ApiResponse updateUser(@RequestBody @Validated UpdateUserRequest updateUserRequest) throws BusinessException {
+        sysUserService.updateUser(updateUserRequest);
+        return ApiResponse.success();
     }
 }

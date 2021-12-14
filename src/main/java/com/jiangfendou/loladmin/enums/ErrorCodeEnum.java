@@ -18,7 +18,8 @@ public enum ErrorCodeEnum {
     MENU_PERM_CODE_EXIST("e.jfd.1009", "权限编码--{%s}--已存在"),
     BAD_REQUEST_ERROR("e.jfd.1010", "请求参数异常"),
     LOCKED("e.jfd.1011", "目标数据已经被锁定"),
-    EXIST_CHILD_NODES("e.jfd.1012", "目标数据存在子节点");
+    EXIST_CHILD_NODES("e.jfd.1012", "目标数据存在子节点"),
+    USERNAME_EXIST_ERROR("e.jfd.1013", "用户名称已经存在");
 
     /** error code. */
     private final String code;

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jiangfendou.loladmin.entity.SysUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.request.UpdateUserRequest;
 import com.jiangfendou.loladmin.model.response.RoleResponse;
 import com.jiangfendou.loladmin.model.response.SearchUserResponse;
 import java.util.List;
@@ -36,4 +37,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * */
     IPage<SearchUserResponse> searchUser(IPage<SearchUserResponse> page,
                                          @Param("searchUserRequest") SearchUserRequest searchUserRequest);
+
+    /**
+     * updateUser()
+     * @Param updateUserRequest updateUserRequest
+     * @return int int
+     * */
+     int updateUser(@Param("updateUserRequest") UpdateUserRequest updateUserRequest);
 }

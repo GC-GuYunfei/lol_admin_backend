@@ -4,7 +4,7 @@
     <delete id="deleteMenu">
         UPDATE sys_menu
         <trim prefix="set" suffixOverrides=",">
-            <if test="deleteMenuRequest.deleteDatetime !=null">
+            <if test="deleteMenuRequest.deleteDatetime != null">
                 delete_datetime = #{deleteMenuRequest.deleteDatetime},
             </if>
             lock_version = lock_version + 1,
@@ -48,28 +48,28 @@
             <if test="updateMenuRequest.parentId != null">
                 parent_id = #{updateMenuRequest.parentId},
             </if>
-            <if test="updateMenuRequest.name !=null || updateMenuRequest.name != ''">
+            <if test="updateMenuRequest.name != null || updateMenuRequest.name != ''">
                 `name` = #{updateMenuRequest.name},
             </if>
-            <if test="updateMenuRequest.path !=null || updateMenuRequest.path != ''">
+            <if test="updateMenuRequest.path != null || updateMenuRequest.path != ''">
                 `path` = #{updateMenuRequest.path},
             </if>
-            <if test="updateMenuRequest.perms !=null || updateMenuRequest.perms != ''">
+            <if test="updateMenuRequest.perms != null || updateMenuRequest.perms != ''">
                 perms = #{updateMenuRequest.perms},
             </if>
-            <if test="updateMenuRequest.component !=null || updateMenuRequest.component != ''">
+            <if test="updateMenuRequest.component != null || updateMenuRequest.component != ''">
                 component = #{updateMenuRequest.component},
             </if>
-            <if test="updateMenuRequest.type !=null">
+            <if test="updateMenuRequest.type != null">
                 `type` = #{updateMenuRequest.type},
             </if>
-            <if test="updateMenuRequest.icon !=null || updateMenuRequest.icon != ''">
+            <if test="updateMenuRequest.icon != null || updateMenuRequest.icon != ''">
                 icon = #{updateMenuRequest.icon},
             </if>
-            <if test="updateMenuRequest.orderNum !=null">
+            <if test="updateMenuRequest.orderNum != null">
                 order_num = #{updateMenuRequest.orderNum},
             </if>
-            <if test="updateMenuRequest.status !=null">
+            <if test="updateMenuRequest.status != null">
                 status = #{updateMenuRequest.status},
             </if>
             lock_version = lock_version + 1
