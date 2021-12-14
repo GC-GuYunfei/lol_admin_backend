@@ -15,6 +15,7 @@ import com.jiangfendou.loladmin.mapper.SysRoleMapper;
 import com.jiangfendou.loladmin.mapper.SysUserMapper;
 import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.response.GetUserDetailResponse;
 import com.jiangfendou.loladmin.model.response.RoleResponse;
 import com.jiangfendou.loladmin.model.response.SearchUserResponse;
 import com.jiangfendou.loladmin.model.response.SysUserResponse;
@@ -166,5 +167,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 默认头像
         sysUser.setAvatar(DEFAULT_AVATAR);
         this.save(sysUser);
+    }
+
+    @Override
+    public GetUserDetailResponse detailUser(Long userId) throws BusinessException {
+        SysUser sysUser = this.getOne(new QueryWrapper<SysUser>().eq("id", userId)
+            .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
+        if (Objects.isNull(sysUser)) {
+            log.info("没有找到的指定用户信息：userId = {}", userId);
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
+        }
+        GetUserDetailResponse getUserDetailResponse = new GetUserDetailResponse();
+        BeanUtils.copyProperties(sysUser, getUserDetailResponse);
+        return getUserDetailResponse;
     }
 }

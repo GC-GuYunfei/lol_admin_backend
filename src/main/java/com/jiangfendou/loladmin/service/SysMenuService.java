@@ -38,11 +38,11 @@ public interface SysMenuService extends IService<SysMenu> {
 
     /**
      * getMenuDetail()
-     * @param userId userId
+     * @param menuId menuId
      * @return List<GetMenuDetailResponse> List<GetMenuDetailResponse>
      * @throws BusinessException BusinessException
      * */
-    GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException;
+    GetMenuDetailResponse getMenuDetail(Long menuId) throws BusinessException;
 
     /**
      * updateMenu()

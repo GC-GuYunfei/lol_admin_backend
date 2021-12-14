@@ -125,13 +125,13 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override
-    public GetMenuDetailResponse getMenuDetail(Long userId) throws BusinessException {
+    public GetMenuDetailResponse getMenuDetail(Long menuId) throws BusinessException {
         GetMenuDetailResponse getMenuDetailResponse = new GetMenuDetailResponse();
         SysMenu sysMenu = this.getOne(new QueryWrapper<SysMenu>()
-            .eq("id", userId)
+            .eq("id", menuId)
             .eq("is_deleted", DeletedEnum.NOT_DELETED.getValue()));
         if (Objects.isNull(sysMenu)) {
-            log.info("getMenuDetail() ---目标数据没有被找到， userId = {}", userId);
+            log.info("getMenuDetail() ---目标数据没有被找到， menuId = {}", menuId);
             throw new BusinessException(HttpStatus.NOT_FOUND,
                 new ApiError(ErrorCodeEnum.NOT_FOUND.getCode(), ErrorCodeEnum.NOT_FOUND.getMessage()));
         }

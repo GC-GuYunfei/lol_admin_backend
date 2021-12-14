@@ -7,6 +7,7 @@ import com.jiangfendou.loladmin.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jiangfendou.loladmin.model.request.SaveUserRequest;
 import com.jiangfendou.loladmin.model.request.SearchUserRequest;
+import com.jiangfendou.loladmin.model.response.GetUserDetailResponse;
 import com.jiangfendou.loladmin.model.response.SearchUserResponse;
 import com.jiangfendou.loladmin.model.response.SysUserResponse;
 import java.util.List;
@@ -74,4 +75,11 @@ public interface SysUserService extends IService<SysUser> {
      * @param saveUserRequest saveUserRequest
      * */
     void saveUser(SaveUserRequest saveUserRequest);
+
+    /**
+     * detailUser()
+     * @param userId userId
+     * @return GetUserDetailResponse GetUserDetailResponse
+     * */
+    GetUserDetailResponse detailUser(Long userId) throws BusinessException;
 }

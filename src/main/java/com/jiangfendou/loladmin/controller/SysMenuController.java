@@ -48,8 +48,8 @@ public class SysMenuController extends BaseController {
     }
 
     @GetMapping("/detail")
-    public ApiResponse<GetMenuDetailResponse> getMenuDetail(Long userId) throws BusinessException {
-        return ApiResponse.success(sysMenuService.getMenuDetail(userId));
+    public ApiResponse<GetMenuDetailResponse> getMenuDetail(Long menuId) throws BusinessException {
+        return ApiResponse.success(sysMenuService.getMenuDetail(menuId));
     }
 
     @PostMapping("/update")
